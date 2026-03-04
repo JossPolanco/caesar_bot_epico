@@ -1,5 +1,5 @@
 import psycopg
-from flask import Flask, jsonify
+from PswEncryption import PswEncription
 
 conn = psycopg.connect(
     host="localhost",
@@ -9,23 +9,51 @@ conn = psycopg.connect(
     port="5432"
 )
 
+pwsEncription = PswEncription()
+
 def createUser(username, password):
-    
     try:
         query = "INSERT INTO TBL_USERS (username, password) VALUES (%s, %s)"
-        values = (username, password)
+        
+        passwordHashed = pwsEncription.hashPassword(password)
+        values = (username, passwordHashed)
+        
         conn.execute(query, values)
         conn.commit()
         
-        return jsonify({
+        return {
             "status": "ok",
             "response": "User successfully created"
-        })
+        }
         
     except Exception as error:
-        return jsonify({
+        conn.rollback()
+        print(error)
+        return {
             "status": "error",
-            "response": error
-        })
-    
+            "response": "An error has occurred during the register"
+        }
+
+def login(username, password):
+    try:
+        query = "SELECT id FROM TBL_USERS WHERE username = %s AND PASSWORD = %s"
+        
+        passwordHashed = pwsEncription.hashPassword(password)
+        
+        values = (username, passwordHashed)
+        conn.execute(query, values)
+        conn.commit()
+        
+        return {
+            "status": "ok",
+            "response": "Login successfully"
+        }
+        
+    except Exception as error:
+        conn.rollback()
+        print(error)
+        return {
+            "status": "error",
+            "response": "An error has occurred during the login"
+        }
     
