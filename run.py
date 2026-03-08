@@ -33,7 +33,7 @@ def decrypt_endpoint():
 @app.route('/register', methods=['POST'])
 def register_endpoint():
     data = request.json
-    phoneNumber = data.get('phoneNumber')
+    phoneNumber = str(data.get('phoneNumber'))
     password = data.get('password')
     
     if not phoneNumber or password is None:
@@ -53,7 +53,7 @@ def register_endpoint():
 @app.route('/login', methods=['POST'])
 def login_endpoint():
     data = request.json
-    phoneNumber = data.get('phoneNumber')
+    phoneNumber = str(data.get('phoneNumber'))
     password = data.get('password')
     
     if not phoneNumber or password is None:

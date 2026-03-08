@@ -10,5 +10,7 @@ class PswEncription:
         
         return pwdHashed
     
-    # def verifyHashed(password):
-    #     if bcrypt.checkpw(password, hashed):
+    def verifyHashed(self, password, stored_hash):
+        if isinstance(stored_hash, str):
+            stored_hash = stored_hash.encode("utf-8")
+        return bcrypt.checkpw(password.encode("utf-8"), stored_hash)

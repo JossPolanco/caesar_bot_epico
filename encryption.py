@@ -15,10 +15,7 @@ def encryption(phrase: str, shift: int):
                 encrypted += letter
                 continue
 
-            new_index = int(index + shift)
-
-            if new_index >= 26:
-                new_index -= 26
+            new_index = (index + shift) % len(alphabet)
 
             if isUpper:
                 encrypted += alphabet[new_index].upper()
@@ -44,10 +41,7 @@ def decryption(phrase: str, shift: int):
                 encrypted += letter
                 continue
 
-            new_index = int(index - shift)
-
-            if new_index < 0:
-                new_index -= 26
+            new_index = (index - shift) % len(alphabet)
 
             if isUpper:
                 encrypted += alphabet[new_index].upper()

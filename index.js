@@ -72,20 +72,25 @@ async function login(phoneNumber, password) {
 }
 
 client.on("message", async (message) => {
+    if (message.fromMe) return;
     const messageBody = message.body.trim();
-    const senderId = message.author || message.from;
-    const phoneNumber = senderId.split('@')[0];
+    const contact = await message.getContact();
+    const phoneNumber = contact.number;
 
     const cipherMatch = messageBody.match(/^!cypher\s+(.+?)\s+(\d+)\s*$/i);
     const decipherMatch = messageBody.match(/^!decypher\s+(.+?)\s+(\d+)\s*$/i);
     const registerMatch = messageBody.match(/^!register\s+(\S+)\s*$/i);
     const loginMatch = messageBody.match(/^!login\s+(\S+)\s*$/i);
+    const logoutMatch = messageBody.match(/^!logout\s*$/i);
 
     if (registerMatch) {
         try {
             const password = registerMatch[1];
             const status = await registerUser(phoneNumber, password);
-            await message.reply(`Status: ${status}`);
+            if (status != 'ok') {
+                await message.reply(`Error: ${status}`);
+            }
+            await message.reply(`Status: ${response}`);
         } catch (error) {
             console.error('Error registering user:', error);
         }
@@ -101,19 +106,22 @@ client.on("message", async (message) => {
                 await message.reply(`Status: ${status}`);
             }
 
-            
         } catch (error) {
             console.error('Error loging user:', error);
         }
     }
-    else if (!loggedInUsers.has(phoneNumber)) {
-        await message.reply('You must login fisrt. Use: !login <password>');
+
+    if (!loggedInUsers.has(phoneNumber)) {
+        if (cipherMatch || decipherMatch || logoutMatch || messageBody.toLowerCase() === 'ping' || messageBody.toLowerCase() === 'que') {
+            await message.reply('You must login first. Use: !login <password>');
+        }
+        return;
     }
-    else if (logoutMatch) {
+
+    if (logoutMatch) {
         loggedInUsers.delete(phoneNumber);
-        await message.reply('Session closed successfully');
-    }
-    else if (messageBody.toLowerCase() === 'ping') {
+        await message.reply('Logout successfully');
+    } else if (messageBody.toLowerCase() === 'ping') {
         await message.reply('pong');
     }
     else if (cipherMatch) {
@@ -124,10 +132,9 @@ client.on("message", async (message) => {
             const encrypted = await encryptMessage(word, shift);
             await message.reply(`Encrypted: ${encrypted}`);
         } catch (error) {
-            await message.reply('Error al encriptar el mensaje');
+            await message.reply('Error encrypting the message');
         }
-    }
-    else if (decipherMatch) {
+    } else if (decipherMatch) {
         try {
             const word = decipherMatch[1];
             const shift = decipherMatch[2];
@@ -135,10 +142,9 @@ client.on("message", async (message) => {
             const decrypted = await decryptMessage(word, shift);
             await message.reply(`Decrypted: ${decrypted}`);
         } catch (error) {
-            await message.reply('Error al desencriptar el mensaje');
+            await message.reply('Error decrypting the message');
         }
-    }
-    else if (message.body.toLowerCase() === 'que') {
+    } else if (message.body.toLowerCase() === 'que') {
         const url = "https://images7.memedroid.com/images/UPLOADED574/625f4dd6290b4.jpeg";
         try {
             const media = await MessageMedia.fromUrl(url);
@@ -151,7 +157,6 @@ client.on("message", async (message) => {
             console.error('Error sending sticker:', error);
         }
     }
-    
 });
 
 client.initialize();

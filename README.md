@@ -1,6 +1,6 @@
 # Caesar Bot Epico
 
-Bot de WhatsApp que cifra y descifra mensajes
+WhatsApp bot that encrypts and decrypts messages
 ## Instalation
 ### 1) Python (Flask)
 ```bash
@@ -14,7 +14,19 @@ pip install -r requirements.txt
 npm install
 ```
 
-## Ejecutar
+### 3) Database installation
+Run the following SQL in your PostgreSQL database:
+
+```sql
+CREATE TABLE TBL_USERS(
+        id SERIAL PRIMARY KEY,
+        username TEXT NOT NULL,
+        password TEXT NOT NULL,
+        active BOOLEAN DEFAULT TRUE
+);
+```
+
+## Execute
 Open two terminals in the root of the project
 
 Terminal A (Flask):
